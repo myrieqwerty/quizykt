@@ -1,0 +1,6 @@
+client
+node_modules
+.env
+nodemon.josn
+package-josn
+nodemon.json
