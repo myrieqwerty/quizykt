@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 
-export default function (req: Request, res: Response, next: NextFunction) {
+export default async function (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   if (req.method === 'OPTIONS') {
     next()
   }

@@ -2,28 +2,35 @@ import { Request, Response, Router } from 'express'
 
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { Prisma } from '@prisma/client'
+import { prisma } from 'src/prisma-client'
 
 const userRouter = Router()
 
 userRouter.post(
   '/register',
-  async (req: Request<{}, {}, IUser>, res: Response) => {
+  async (req: Request<{}, {}, Prisma.UserGetPayload<{}>>, res: Response) => {
     try {
-      const { email, name, surname, password, avatar, phone } = req.body
+      const { name, surname, email, password, phone } = req.body
 
       const salt = await bcrypt.genSalt(10)
       const hashPassword = await bcrypt.hash(password, salt)
 
-      const user = await User.create({
-        email,
-        name,
-        surname,
-        password: hashPassword,
-        avatar,
-        phone,
+      const newUser = await prisma.user.create({
+        data: {
+          email: email,
+          name: name,
+          surname: surname,
+          password: hashPassword,
+          phone: phone,
+        },
       })
 
-      res.status(200).send({ user: user })
+      if (!newUser) {
+        res.status(400).send('Пользователь уже существует')
+      }
+
+      res.status(200).send({ newUser: newUser })
     } catch (error) {
       res.status(400).send('register error')
     }

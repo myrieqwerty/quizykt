@@ -9,8 +9,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mysql"
+  url      = "mysql://root:root@127.0.0.1:3306/quizykt"
 }
 
 model User {

@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { Request, Response, Router } from 'express'
 import { prisma } from 'src/prisma-client'
 
@@ -13,10 +14,10 @@ quizRouter.get(
       skip: offset,
       take: pageSize,
     })
-    //const quizes = await Quiz.find().skip(offset).limit(pageSize)
+
     const quizesTotalCount = quizes.length
 
-    const pageCount = Math.round(quizesTotalCount / 10)
+    const pageCount = Math.ceil(quizesTotalCount / 10)
 
     res.send({
       pagination: {
@@ -26,6 +27,42 @@ quizRouter.get(
       },
       quizes: quizes,
     })
+  }
+)
+
+quizRouter.post(
+  '/create',
+  async (
+    req: Request<
+      {},
+      {},
+      Prisma.QuizGetPayload<{
+        include: { questions: { include: { answers: true } } }
+      }>
+    >,
+    res: Response
+  ) => {
+    const { description, imageUrl, questions, title } = req.body
+
+    const newQuiz = await prisma.quiz.create({
+      data: {
+        title: title,
+        description: description,
+        questions: {
+          create: questions?.map((q) => ({
+            title: q.title,
+            answers: {
+              create: q.answers.map((answer) => ({
+                title: answer.title,
+                isCorrect: answer.isCorrect,
+              })),
+            },
+          })),
+        },
+      },
+    })
+
+    res.send({ newQuiz: newQuiz })
   }
 )
 
